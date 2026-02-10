@@ -1,0 +1,122 @@
+---
+// GridItem.astro
+// versatile component for Video, News, or Shop items
+
+interface Props {
+    type: "video" | "news" | "shop";
+    title: string;
+    subtitle?: string; // Date for news, Price for shop, etc.
+    image?: string;
+    link: string;
+    isProtected?: boolean; // For videos
+    spanClass?: string; // tailwind class for col-span (e.g., md:col-span-2)
+}
+
+const {
+    type,
+    title,
+    subtitle,
+    image,
+    link,
+    isProtected = false,
+    spanClass = "col-span-1",
+} = Astro.props;
+
+const isVideo = type === "video";
+const isNews = type === "news";
+const isShop = type === "shop";
+---
+
+<article
+    class={`group relative flex flex-col ${spanClass} ${isShop ? "row-span-2" : ""}`}
+>
+    {/* Media Container */}
+    <a
+        href={link}
+        class={`block overflow-hidden relative bg-neutral-900 mb-3 transition-transform duration-500 ease-out group-hover:scale-[1.01] ${isShop ? "aspect-[2/3]" : "aspect-video"}`}
+    >
+        {
+            image ? (
+                <img
+                    src={image}
+                    alt={title}
+                    class="w-full h-full object-cover transition-opacity duration-500 group-hover:opacity-80"
+                />
+            ) : (
+                /* Fallback Placeholder */
+                <div
+                    class={`absolute inset-0 flex items-center justify-center bg-neutral-800 transition-colors ${isVideo ? "group-hover:bg-neutral-700" : ""}`}
+                >
+                    <span class="text-neutral-600 font-black text-4xl opacity-20 uppercase tracking-widest truncate max-w-full px-4 text-center">
+                        {type}
+                    </span>
+                </div>
+            )
+        }
+
+        {/* Video: Protected Badge */}
+        {
+            isVideo && isProtected && (
+                <div class="absolute top-0 right-0 p-2 z-20">
+                    <div class="bg-black/90 backdrop-blur text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider border border-white/20">
+                        Protected
+                    </div>
+                </div>
+            )
+        }
+
+        {/* Shop: Tag */}
+        {
+            isShop && (
+                <div class="absolute top-0 left-0 p-2 z-20">
+                    <div class="bg-[#ff208a] text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider">
+                        Shop
+                    </div>
+                </div>
+            )
+        }
+
+        {/* News: Tag */}
+        {
+            isNews && (
+                <div class="absolute top-0 left-0 p-2 z-20">
+                    <div class="bg-white text-black text-[10px] font-bold px-2 py-1 uppercase tracking-wider">
+                        News
+                    </div>
+                </div>
+            )
+        }
+
+        {
+            /* Hover Overlay (Video Only usually, but let's add subtle effect for others) */
+        }
+        {
+            isVideo && (
+                <div class="absolute inset-0 bg-[#ff208a]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-10">
+                    <div class="bg-black text-white px-4 py-2 uppercase font-bold text-sm tracking-widest border border-[#ff208a]">
+                        Watch
+                    </div>
+                </div>
+            )
+        }
+    </a>
+
+    {/* Content Metadata */}
+    <div class="flex flex-col items-start space-y-1">
+        <h2
+            class={`font-bold leading-tight uppercase tracking-tight group-hover:text-[#ff208a] transition-colors ${isNews ? "text-lg" : "text-xl"}`}
+        >
+            <a href={link}>
+                {title}
+            </a>
+        </h2>
+
+        {
+            subtitle && (
+                <div class="flex items-center text-xs font-mono text-gray-500 space-x-2">
+                    <span>{subtitle}</span>
+                </div>
+            )
+        }
+    </div>
+</article>

@@ -1,8 +1,16 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import Hero from "../components/Hero.astro";
+import GridItem from "../components/GridItem.astro";
+import TextBlock from "../components/TextBlock.astro";
 import { getCollection } from "astro:content";
 
 const videos = await getCollection("videos");
+
+// Sort videos by date (newest first)
+const sortedVideos = videos.sort(
+	(a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
 
 // Helper for date formatting
 const formatDate = (date: Date) => {
@@ -12,83 +20,168 @@ const formatDate = (date: Date) => {
 		day: "numeric",
 	}).format(date);
 };
+
+// Dummy Data for Mixed Grid
+const newsItems = [
+	{
+		title: "The Iron Claw: Behind the Scenes",
+		date: "October 12, 2023",
+		link: "#",
+		image: "https://images.unsplash.com/photo-1574352067721-72d5913ee35c?q=80&w=1000&auto=format&fit=crop",
+	},
+	{
+		title: "A24 x Online Ceramics Drop 002",
+		date: "September 28, 2023",
+		link: "#",
+		image: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=1000&auto=format&fit=crop",
+	},
+];
+
+const shopItems = [
+	{
+		title: "Logo Tee - Black",
+		price: "$45.00",
+		link: "#",
+		image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1000&auto=format&fit=crop",
+	},
+	{
+		title: "Zine Issue #12",
+		price: "$15.00",
+		link: "#",
+		image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=1000&auto=format&fit=crop",
+	},
+];
+
+// Featured Video (Newest)
+const featuredVideo = sortedVideos[0];
+const remainingVideos = sortedVideos.slice(1);
 ---
 
-<Layout title="Videos">
-	<main class="min-h-screen bg-black text-white">
-		{/* Header - Minimalist A24 style */}
-		<header
-			class="container mx-auto px-4 py-8 md:py-12 flex justify-between items-baseline border-b border-white/20"
+<Layout title="Johan Toast">
+	<main class="min-h-screen bg-black text-white pb-20">
+		{/* Full Screen Hero with the latest video or custom content */}
+		{
+			featuredVideo ? (
+				<Hero
+					title={featuredVideo.data.title}
+					subtitle="New Release"
+					ctaLink={`/video/${featuredVideo.slug}`}
+					image="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=2525&auto=format&fit=crop"
+				/>
+			) : (
+				<Hero title="Johan Toast" subtitle="Visuals" />
+			)
+		}
+
+		{/* Minimal Header (Sticky?) or just section break */}
+		<div
+			class="container mx-auto px-4 py-8 mb-8 border-b border-white/20 flex justify-between items-end"
 		>
 			<h1
-				class="text-3xl md:text-5xl font-black tracking-tighter uppercase"
+				class="text-xs font-mono uppercase tracking-widest text-gray-500"
 			>
-				Videos
+				Latest Updates
 			</h1>
-			<span class="text-sm font-mono text-gray-400"
-				>{videos.length} ENTRIES</span
+			<span
+				class="text-xs font-mono uppercase tracking-widest text-[#ff208a]"
 			>
-		</header>
+				Scroll Down
+			</span>
+		</div>
 
-		{/* Grid Layout */}
-		<div class="container mx-auto px-4 py-8">
+		{/* Mixed Grid Layout */}
+		<div class="container mx-auto px-4">
 			<div
-				class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-8"
+				class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-16"
 			>
+				{/* 1. First batch of videos */}
 				{
-					videos.map((video) => (
-						<article class="group relative flex flex-col">
-							{/* Thumbnail Container */}
-							<a
-								href={`/video/${video.slug}`}
-								class="block overflow-hidden relative aspect-video bg-neutral-900 mb-4 transition-transform duration-500 ease-out group-hover:scale-[1.02]"
-							>
-								{/* Poster/Thumbnail Placeholder - In a real app, you'd map a cover image here */}
-								<div class="absolute inset-0 flex items-center justify-center bg-neutral-800 group-hover:bg-neutral-700 transition-colors">
-									<span class="text-neutral-500 font-black text-6xl opacity-20 uppercase tracking-widest truncate max-w-full px-4 text-center">
-										{video.data.title.substring(0, 2)}
-									</span>
-								</div>
-
-								{/* Protected Badge - Minimalist */}
-								{video.data.is_protected && (
-									<div class="absolute top-0 right-0 p-2">
-										<div class="bg-black/90 backdrop-blur text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider border border-white/20">
-											Protected
-										</div>
-									</div>
-								)}
-
-								{/* Hover Overlay */}
-								<div class="absolute inset-0 bg-[#ff208a]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-									<div class="bg-black text-white px-4 py-2 uppercase font-bold text-sm tracking-widest border border-[#ff208a]">
-										Watch
-									</div>
-								</div>
-							</a>
-
-							{/* Content Metadata - Minimal, Uppercase, Bold */}
-							<div class="flex flex-col items-start space-y-1">
-								<h2 class="text-xl md:text-2xl font-bold leading-tight uppercase tracking-tight group-hover:text-[#ff208a] transition-colors">
-									<a href={`/video/${video.slug}`}>
-										{video.data.title}
-									</a>
-								</h2>
-								<div class="flex items-center text-xs font-mono text-gray-500 space-x-2">
-									<span>{formatDate(video.data.date)}</span>
-									<span>•</span>
-									<span class="uppercase">Video</span>
-								</div>
-								{/* Description - Hidden on mobile, visible on desktop? Or just keep it very clean? */}
-								{/* A24 usually keeps list views very clean. Let's keep description standard text but muted */}
-								<p class="text-sm text-gray-400 line-clamp-2 pt-2 leading-relaxed max-w-md">
-									{video.data.description}
-								</p>
-							</div>
-						</article>
-					))
+					remainingVideos
+						.slice(0, 2)
+						.map((video) => (
+							<GridItem
+								type="video"
+								title={video.data.title}
+								subtitle={formatDate(video.data.date)}
+								link={`/video/${video.slug}`}
+								isProtected={video.data.is_protected}
+								spanClass="col-span-1 md:col-span-2 lg:col-span-2"
+							/>
+						))
 				}
+
+				{/* 2. Shop Item (Portrait) */}
+				<GridItem
+					type="shop"
+					title={shopItems[0].title}
+					subtitle={shopItems[0].price}
+					link={shopItems[0].link}
+					image={shopItems[0].image}
+					spanClass="col-span-1 row-span-2 hidden lg:block"
+					Tall
+					item
+				/>
+
+				{/* 3. News Item */}
+				<GridItem
+					type="news"
+					title={newsItems[0].title}
+					subtitle={newsItems[0].date}
+					link={newsItems[0].link}
+					image={newsItems[0].image}
+					spanClass="col-span-1"
+				/>
+
+				{/* Typographic Break */}
+				<div
+					class="col-span-1 md:col-span-2 lg:col-span-4 border-t border-b border-white/10 my-8"
+				>
+					<TextBlock text="Originals" subtext="Selected Works" />
+				</div>
+
+				{/* 4. More Videos */}
+				{
+					remainingVideos
+						.slice(2)
+						.map((video) => (
+							<GridItem
+								type="video"
+								title={video.data.title}
+								subtitle={formatDate(video.data.date)}
+								link={`/video/${video.slug}`}
+								isProtected={video.data.is_protected}
+								spanClass="col-span-1"
+							/>
+						))
+				}
+
+				{/* 5. Another Shop Item */}
+				<GridItem
+					type="shop"
+					title={shopItems[1].title}
+					subtitle={shopItems[1].price}
+					link={shopItems[1].link}
+					image={shopItems[1].image}
+					spanClass="col-span-1"
+				/>
+
+				{/* 6. Another News Item */}
+				<GridItem
+					type="news"
+					title={newsItems[1].title}
+					subtitle={newsItems[1].date}
+					link={newsItems[1].link}
+					image={newsItems[1].image}
+					spanClass="col-span-1 md:col-span-2"
+				/>
 			</div>
 		</div>
+
+		{/* Footer Text Block */}
+		<TextBlock
+			text="Johan Toast"
+			subtext="Established 2024"
+			align="center"
+		/>
 	</main>
 </Layout>
