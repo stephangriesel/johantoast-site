@@ -1,0 +1,94 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { getCollection } from "astro:content";
+
+const videos = await getCollection("videos");
+
+// Helper for date formatting
+const formatDate = (date: Date) => {
+	return new Intl.DateTimeFormat("en-US", {
+		year: "numeric",
+		month: "long",
+		day: "numeric",
+	}).format(date);
+};
+---
+
+<Layout title="Videos">
+	<main class="min-h-screen bg-black text-white">
+		{/* Header - Minimalist A24 style */}
+		<header
+			class="container mx-auto px-4 py-8 md:py-12 flex justify-between items-baseline border-b border-white/20"
+		>
+			<h1
+				class="text-3xl md:text-5xl font-black tracking-tighter uppercase"
+			>
+				Videos
+			</h1>
+			<span class="text-sm font-mono text-gray-400"
+				>{videos.length} ENTRIES</span
+			>
+		</header>
+
+		{/* Grid Layout */}
+		<div class="container mx-auto px-4 py-8">
+			<div
+				class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-8"
+			>
+				{
+					videos.map((video) => (
+						<article class="group relative flex flex-col">
+							{/* Thumbnail Container */}
+							<a
+								href={`/video/${video.slug}`}
+								class="block overflow-hidden relative aspect-video bg-neutral-900 mb-4 transition-transform duration-500 ease-out group-hover:scale-[1.02]"
+							>
+								{/* Poster/Thumbnail Placeholder - In a real app, you'd map a cover image here */}
+								<div class="absolute inset-0 flex items-center justify-center bg-neutral-800 group-hover:bg-neutral-700 transition-colors">
+									<span class="text-neutral-500 font-black text-6xl opacity-20 uppercase tracking-widest truncate max-w-full px-4 text-center">
+										{video.data.title.substring(0, 2)}
+									</span>
+								</div>
+
+								{/* Protected Badge - Minimalist */}
+								{video.data.is_protected && (
+									<div class="absolute top-0 right-0 p-2">
+										<div class="bg-black/90 backdrop-blur text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider border border-white/20">
+											Protected
+										</div>
+									</div>
+								)}
+
+								{/* Hover Overlay */}
+								<div class="absolute inset-0 bg-[#ff208a]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+									<div class="bg-black text-white px-4 py-2 uppercase font-bold text-sm tracking-widest border border-[#ff208a]">
+										Watch
+									</div>
+								</div>
+							</a>
+
+							{/* Content Metadata - Minimal, Uppercase, Bold */}
+							<div class="flex flex-col items-start space-y-1">
+								<h2 class="text-xl md:text-2xl font-bold leading-tight uppercase tracking-tight group-hover:text-[#ff208a] transition-colors">
+									<a href={`/video/${video.slug}`}>
+										{video.data.title}
+									</a>
+								</h2>
+								<div class="flex items-center text-xs font-mono text-gray-500 space-x-2">
+									<span>{formatDate(video.data.date)}</span>
+									<span>•</span>
+									<span class="uppercase">Video</span>
+								</div>
+								{/* Description - Hidden on mobile, visible on desktop? Or just keep it very clean? */}
+								{/* A24 usually keeps list views very clean. Let's keep description standard text but muted */}
+								<p class="text-sm text-gray-400 line-clamp-2 pt-2 leading-relaxed max-w-md">
+									{video.data.description}
+								</p>
+							</div>
+						</article>
+					))
+				}
+			</div>
+		</div>
+	</main>
+</Layout>

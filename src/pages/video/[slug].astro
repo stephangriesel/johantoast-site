@@ -1,0 +1,131 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getCollection } from "astro:content";
+
+export async function getStaticPaths() {
+    const videos = await getCollection("videos");
+    return videos.map((video) => ({
+        params: { slug: video.slug },
+        props: { video },
+    }));
+}
+
+const { video } = Astro.props;
+let videoUrl = "";
+
+// Determine video URL source
+if (video.data.is_protected) {
+    if (Astro.locals.user) {
+        videoUrl = `/api/video/${video.data.s3_key}`;
+    }
+} else {
+    videoUrl = `/api/video/${video.data.s3_key}`;
+}
+---
+
+<Layout title={video.data.title}>
+    <main class="min-h-screen bg-black text-white flex flex-col">
+        {/* Navigation - Minimal */}
+        <nav
+            class="container mx-auto px-4 py-6 flex justify-between items-center z-10 relative"
+        >
+            <a
+                href="/"
+                class="group flex items-center text-sm font-bold uppercase tracking-widest hover:text-[#ff208a] transition-colors"
+            >
+                <span
+                    class="mr-2 text-lg group-hover:-translate-x-1 transition-transform"
+                    >&larr;</span
+                >
+                Index
+            </a>
+            <div class="text-xs font-mono text-gray-500">
+                {video.data.is_protected ? "SECURE ACCESS" : "PUBLIC ACCESS"}
+            </div>
+        </nav>
+
+        {/* Video Player Container - Cinematic */}
+        <div
+            class="flex-grow flex flex-col justify-center container mx-auto px-0 md:px-4 mb-12"
+        >
+            <div
+                class="relative w-full bg-neutral-900 border-y md:border border-neutral-800 md:rounded-sm overflow-hidden shadow-2xl"
+            >
+                <div class="aspect-video relative">
+                    {
+                        video.data.is_protected && !Astro.locals.user ? (
+                            <div class="absolute inset-0 flex flex-col items-center justify-center bg-black/95 text-white z-10 backdrop-blur-sm">
+                                <div class="text-center p-8 max-w-md border border-white/10 p-12 bg-neutral-900/50">
+                                    <h3 class="text-2xl font-black uppercase tracking-tighter mb-4 text-[#ff208a]">
+                                        Restricted Content
+                                    </h3>
+                                    <p class="text-gray-400 mb-8 font-mono text-sm leading-relaxed">
+                                        This material is protected.
+                                        Authentication is required to proceed.
+                                    </p>
+                                    <a
+                                        href="/login"
+                                        class="inline-block bg-white text-black font-bold uppercase tracking-widest text-xs py-4 px-8 hover:bg-[#ff208a] hover:text-white transition-colors duration-300"
+                                    >
+                                        Authentication
+                                    </a>
+                                </div>
+                            </div>
+                        ) : (
+                            <video
+                                controls
+                                autoplaY={false}
+                                class="w-full h-full object-contain bg-black"
+                                controlsList="nodownload"
+                            >
+                                <source src={videoUrl} type="video/mp4" />
+                                Your browser does not support the video tag.
+                            </video>
+                        )
+                    }
+                </div>
+            </div>
+
+            {/* Minimalist Metadata Below Video */}
+            <div class="mt-8 px-4 md:px-0 max-w-4xl mx-auto w-full">
+                <div
+                    class="flex flex-col md:flex-row md:items-baseline justify-between border-b border-white/10 pb-6 mb-6"
+                >
+                    <h1
+                        class="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none mb-4 md:mb-0"
+                    >
+                        {video.data.title}
+                    </h1>
+                    <span class="font-mono text-sm text-[#ff208a]">
+                        {new Date(video.data.date).getFullYear()}
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <div
+                        class="md:col-span-1 font-mono text-xs text-gray-500 space-y-2 uppercase tracking-wide"
+                    >
+                        <div>
+                            Released: {
+                                new Date(video.data.date).toLocaleDateString()
+                            }
+                        </div>
+                        <div>Type: Video</div>
+                        <div>
+                            Status: {
+                                video.data.is_protected ? "Protected" : "Public"
+                            }
+                        </div>
+                    </div>
+                    <div class="md:col-span-3">
+                        <p
+                            class="text-lg text-gray-300 leading-relaxed font-light"
+                        >
+                            {video.data.description}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</Layout>

@@ -1,0 +1,29 @@
+---
+// src/pages/admin/index.astro
+// Explicitly serve the Decap CMS admin page
+---
+
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Content Manager</title>
+        <!-- Force trailing slash -->
+        <script>
+            (function () {
+                if (
+                    window.location.pathname === "/admin" &&
+                    !window.location.hash
+                ) {
+                    window.location.replace("/admin/" + window.location.search);
+                }
+            })();
+        </script>
+    </head>
+    <body>
+        <!-- Load CMS script -->
+        <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"
+        ></script>
+    </body>
+</html>
