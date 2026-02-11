@@ -15,7 +15,9 @@
 body {
   background-color: var(--color-bg);
   color: var(--color-text);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  letter-spacing: -0.03em;
+  /* Tighter tracking for that clean cinematic look */
 }
 
 /* Custom utilities for the specific design */
