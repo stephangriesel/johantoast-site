@@ -2,7 +2,20 @@ import { defineMiddleware } from 'astro:middleware';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
 
 export const onRequest = defineMiddleware(async (context, next) => {
-    const { url, redirect, locals } = context;
+    const { url, redirect, locals, cookies } = context;
+
+    // --- Maintenance Mode / Splash Page Check ---
+    const publicRoutes = ['/splash', '/api/access', '/admin', '/logo.png', '/favicon.svg', '/favicon.ico'];
+    const isPublic = publicRoutes.some(route => url.pathname.startsWith(route));
+    const isStaticAsset = url.pathname.match(/\.(css|js|jpg|png|gif|svg|webp)$/);
+
+    if (!isPublic && !isStaticAsset) {
+        const hasAccess = cookies.get('site_access')?.value === 'granted';
+        if (!hasAccess) {
+            return redirect('/splash');
+        }
+    }
+    // -------------------------------------------
 
     // Protected routes check
     if (url.pathname.startsWith('/exclusive')) {

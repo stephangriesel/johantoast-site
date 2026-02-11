@@ -1,0 +1,135 @@
+---
+import "../styles/global.css";
+
+const error = Astro.url.searchParams.get("error");
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="icon" type="image/png" href="/logo.png" />
+        <title>Johan Toast - Maintenance</title>
+    </head>
+    <body
+        class="bg-black text-white h-screen w-screen flex flex-col items-center justify-center overflow-hidden relative"
+    >
+        {/* Secret Trigger Area (Top Left) */}
+        <div
+            id="secret-trigger"
+            class="fixed top-0 left-0 w-16 h-16 z-50 cursor-default"
+        >
+        </div>
+
+        <div class="flex flex-col items-center gap-8">
+            {/* Shaking Logo Container */}
+            <div class="shake-container">
+                <!-- Using the image logo if available, or fall back to text -->
+                <img
+                    src="/logo.png"
+                    alt="Johan Toast"
+                    class="w-48 md:w-64 mb-8"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                />
+                <h1
+                    class="font-black text-4xl uppercase tracking-tighter hidden"
+                >
+                    Johan Toast
+                </h1>
+            </div>
+
+            {/* Password Form (Hidden by default) */}
+            <form
+                id="password-form"
+                action="/api/access"
+                method="POST"
+                class={`flex flex-col gap-4 items-center transition-all duration-500 ease-in-out ${error ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none translate-y-4"}`}
+            >
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="Enter Password"
+                    class="bg-transparent border-b border-white/20 text-center py-2 px-4 focus:outline-none focus:border-[#ff208a] transition-colors text-sm tracking-widest uppercase placeholder:text-neutral-700"
+                />
+
+                {
+                    error && (
+                        <p class="text-[#ff208a] text-xs font-mono uppercase tracking-widest animate-pulse">
+                            Access Denied
+                        </p>
+                    )
+                }
+            </form>
+        </div>
+
+        <script>
+            const trigger = document.getElementById("secret-trigger");
+            const form = document.getElementById("password-form");
+            const input = form?.querySelector("input");
+
+            if (trigger && form && input) {
+                trigger.addEventListener("click", () => {
+                    form.classList.remove(
+                        "opacity-0",
+                        "pointer-events-none",
+                        "translate-y-4",
+                    );
+                    form.classList.add(
+                        "opacity-100",
+                        "pointer-events-auto",
+                        "translate-y-0",
+                    );
+                    input.focus();
+                });
+            }
+        </script>
+
+        <style>
+            /* Aggressive Shake Animation */
+            @keyframes shake {
+                0% {
+                    transform: translate(1px, 1px) rotate(0deg);
+                }
+                10% {
+                    transform: translate(-1px, -2px) rotate(-1deg);
+                }
+                20% {
+                    transform: translate(-3px, 0px) rotate(1deg);
+                }
+                30% {
+                    transform: translate(3px, 2px) rotate(0deg);
+                }
+                40% {
+                    transform: translate(1px, -1px) rotate(1deg);
+                }
+                50% {
+                    transform: translate(-1px, 2px) rotate(-1deg);
+                }
+                60% {
+                    transform: translate(-3px, 1px) rotate(0deg);
+                }
+                70% {
+                    transform: translate(3px, 1px) rotate(-1deg);
+                }
+                80% {
+                    transform: translate(-1px, -1px) rotate(1deg);
+                }
+                90% {
+                    transform: translate(1px, 2px) rotate(0deg);
+                }
+                100% {
+                    transform: translate(1px, -2px) rotate(-1deg);
+                }
+            }
+
+            .shake-container img,
+            .shake-container h1 {
+                animation: shake 0.5s infinite;
+            }
+
+            /* Stop shaking on hover? Or make it worse? Let's make it worse on form focus maybe. */
+            /* For now constant shake as requested "shaking affect" */
+        </style>
+    </body>
+</html>
